@@ -1588,8 +1588,15 @@ def parser_analyze_expense_response(response):
             page_number = doc["SummaryFields"][0].get("PageNumber")
         elif len(doc["LineItemGroups"]):
             # A group must have at least one LineItem, and a LI must have at least one field:
-            first_field = doc["LineItemGroups"][0]["LineItems"][0]["LineItemExpenseFields"][0]
-            page_number = first_field.get("PageNumber")
+            try:
+                first_field = doc["LineItemGroups"][0]["LineItems"][0]["LineItemExpenseFields"][0]
+                page_number = first_field.get("PageNumber")
+            except IndexError:
+                logger.warning(
+                    "Skipping parsing ExpenseDocument %s as its page number could not be determined"
+                    % (doc["ExpenseIndex"],)
+                )
+                continue
         if page_number is None:
             logger.warning(
                 "Skipping parsing ExpenseDocument %s as its page number could not be determined"
